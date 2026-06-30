@@ -59,7 +59,7 @@ MODELS = {
     "ModernBERT": "answerdotai/ModernBERT-base",
 }
 
-_HERE = Path(__file__).resolve().parents[2]   # repo root
+_ROOT = Path(__file__).resolve().parents[2]   # repo root
 
 # Matches editorial brackets but NOT special tokens like [GAP], [MASK] etc.
 ROUND_PAT  = re.compile(r"\(([^)]+)\)")
@@ -221,8 +221,8 @@ def prepare_model(model_key: str, hf_name: str,
 
 def parse_args():
     p = argparse.ArgumentParser()
-    p.add_argument("--data_dir",   default=str(_HERE / "data/splits"), type=Path)
-    p.add_argument("--output_dir", default=str(_HERE / "data/splits"), type=Path)
+    p.add_argument("--data_dir",   default=str(_ROOT / "data/splits"), type=Path)
+    p.add_argument("--output_dir", default=str(_ROOT / "data/splits"), type=Path)
     p.add_argument("--max_length", default=512, type=int)
     p.add_argument("--models", nargs="+",
                    default=list(MODELS.keys()),

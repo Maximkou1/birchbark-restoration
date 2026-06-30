@@ -63,13 +63,13 @@ MODELS = {
     "ModernBERT": {"hf_name": "answerdotai/ModernBERT-base",  "suffix": "modernbert"},
 }
 
-_HERE = Path(__file__).resolve().parents[2]
+_ROOT = Path(__file__).resolve().parents[2]
 
 
 def parse_args():
     p = argparse.ArgumentParser()
-    p.add_argument("--data_dir",      default=str(_HERE / "data/splits"), type=Path)
-    p.add_argument("--output_dir",    default=str(_HERE / "outputs/finetune_tokens"), type=Path)
+    p.add_argument("--data_dir",      default=str(_ROOT / "data/splits"), type=Path)
+    p.add_argument("--output_dir",    default=str(_ROOT / "outputs/finetune_tokens"), type=Path)
     p.add_argument("--epochs",        default=30,   type=int)
     p.add_argument("--batch_size",    default=64,   type=int)
     p.add_argument("--lr",            default=5e-5, type=float)

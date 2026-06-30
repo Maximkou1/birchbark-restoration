@@ -38,13 +38,13 @@ MODELS = {
     "ModernBERT": {"data_dir": None},
 }
 
-_HERE = Path(__file__).resolve().parents[2]
+_ROOT = Path(__file__).resolve().parents[2]
 
 
 def parse_args():
     p = argparse.ArgumentParser()
-    p.add_argument("--data_dir",   default=str(_HERE / "data/splits"), type=Path)
-    p.add_argument("--output_dir", default=str(_HERE / "outputs/finetune_char"), type=Path)
+    p.add_argument("--data_dir",   default=str(_ROOT / "data/splits"), type=Path)
+    p.add_argument("--output_dir", default=str(_ROOT / "outputs/finetune_char"), type=Path)
     p.add_argument("--seed",       default=42, type=int)
     p.add_argument("--max_gaps",   default=0,  type=int,
                    help="Max positions per report (0 = no limit).")

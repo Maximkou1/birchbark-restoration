@@ -24,6 +24,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 
+_ROOT = Path(__file__).resolve().parents[2]
 
 def read_log(path: str) -> list[dict]:
     """Read CSV with variable number of columns per row."""
@@ -118,7 +119,6 @@ def plot_val_curves(
 
     plt.tight_layout(pad=1.5)
     plt.savefig(output, bbox_inches='tight')
-    # Also save PNG alongside
     png_path = output.replace('.pdf', '.png')
     plt.savefig(png_path, dpi=150, bbox_inches='tight')
     print(f"Saved: {output}")
@@ -127,9 +127,9 @@ def plot_val_curves(
 
 def parse_args():
     p = argparse.ArgumentParser()
-    p.add_argument('--char_log', default='outputs/finetune_char/epoch_log.csv')
-    p.add_argument('--tok_log',  default='outputs/finetune_tokens/epoch_log.csv')
-    p.add_argument('--output',   default='outputs/finetune_val_curves.pdf')
+    p.add_argument('--char_log', default=str(_ROOT / 'outputs/finetune_char/epoch_log.csv'), type=Path)
+    p.add_argument('--tok_log',  default=str(_ROOT / 'outputs/finetune_tokens/epoch_log.csv'), type=Path)
+    p.add_argument('--output',   default=str(_ROOT / 'outputs/finetune_val_curves.pdf'), type=Path)
     return p.parse_args()
 
 

@@ -80,13 +80,13 @@ MODELS = {
     },
 }
 
-_HERE = Path(__file__).resolve().parents[2]
+_ROOT = Path(__file__).resolve().parents[2]
 
 
 def parse_args():
     p = argparse.ArgumentParser()
-    p.add_argument("--data_dir",      default=str(_HERE / "data/splits"), type=Path)
-    p.add_argument("--output_dir",    default=str(_HERE / "outputs/zeroshot"), type=Path)
+    p.add_argument("--data_dir",      default=str(_ROOT / "data/splits"), type=Path)
+    p.add_argument("--output_dir",    default=str(_ROOT / "outputs/zeroshot"), type=Path)
     p.add_argument("--seed",          default=42,   type=int)
     p.add_argument("--mask_prob",     default=0.08, type=float)
     p.add_argument("--span_p",        default=0.35, type=float)

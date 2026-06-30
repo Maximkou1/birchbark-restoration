@@ -41,13 +41,13 @@ MODELS = {
     "ModernBERT": {"suffix": "modernbert"},
 }
 
-_HERE = Path(__file__).resolve().parents[2]
+_ROOT = Path(__file__).resolve().parents[2]
 
 
 def parse_args():
     p = argparse.ArgumentParser()
-    p.add_argument("--data_dir",   default=str(_HERE / "data/splits"), type=Path)
-    p.add_argument("--output_dir", default=str(_HERE / "MLM/outputs_tokens"), type=Path)
+    p.add_argument("--data_dir",   default=str(_ROOT / "data/splits"), type=Path)
+    p.add_argument("--output_dir", default=str(_ROOT / "MLM/outputs_tokens"), type=Path)
     p.add_argument("--batch_size", default=32, type=int)
     p.add_argument("--models", nargs="+", default=list(MODELS.keys()),
                    choices=list(MODELS.keys()))

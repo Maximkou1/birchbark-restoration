@@ -48,13 +48,13 @@ MODELS = {
                    "data_dir": None},
 }
 
-_HERE = Path(__file__).resolve().parents[2]
+_ROOT = Path(__file__).resolve().parents[2]
 
 
 def parse_args():
     p = argparse.ArgumentParser()
-    p.add_argument("--data_dir",       default=str(_HERE / "data/splits"), type=Path)
-    p.add_argument("--output_dir",     default=str(_HERE / "outputs/finetune_char"), type=Path)
+    p.add_argument("--data_dir",       default=str(_ROOT / "data/splits"), type=Path)
+    p.add_argument("--output_dir",     default=str(_ROOT / "outputs/finetune_char"), type=Path)
     p.add_argument("--epochs",         default=30,   type=int)
     p.add_argument("--patience",       default=3,    type=int)
     p.add_argument("--batch_size",     default=64,   type=int)
