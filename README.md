@@ -41,6 +41,13 @@ Character- and token-level restoration on real lacunae (Test B), Hit@1 (%):
 | DualEmbLM | from scratch | **46.93** |     —     |
 | RoFormerBPE | from scratch |     —     |   14.54   |
 
+Classification on frozen embeddings (linear probe) vs. TF-IDF + LogReg baseline:
+
+| Task | Metric | Best Model | Baseline |
+| :--- | :--- | :---: | :---: |
+| Genre | macro-F1, % ↑ | **67.9** (BERTislav) | 61.7 |
+| Dating | error, years ↓ (mean) | **40.1** (BERTislav) | 46.5 |
+| Dating | error, years ↓ (median) | **25.0** (mBERT) | 38.6 |
 ## Repository layout
 
 ```
