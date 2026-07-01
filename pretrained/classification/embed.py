@@ -26,10 +26,8 @@ from config_probe import (
     DATA_DIR, EMBED_DIR, MODELS, BIRCH_ROOT,
 )
 
-# From-scratch model dependencies (RoFormer/DualEmb) are disabled in the
-# pretrained-only setup. Re-enable these paths if those models are added back.
-# sys.path.insert(0, str(BIRCH_ROOT / "from_scratch/roformer"))
-# sys.path.insert(0, str(BIRCH_ROOT / "from_scratch/novgorodets"))
+sys.path.insert(0, str(BIRCH_ROOT / "from_scratch/RoFormerBPE"))
+sys.path.insert(0, str(BIRCH_ROOT / "from_scratch/DualEmbLM"))
 
 EMBED_DIR.mkdir(parents=True, exist_ok=True)
 

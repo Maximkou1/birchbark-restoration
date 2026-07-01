@@ -31,11 +31,6 @@ CATEGORY_TO_IDX = {c: i for i, c in enumerate(CATEGORY_LABELS)}
 # letters~696, records~330, religious~45, other~171
 CATEGORY_WEIGHTS = [1.0, 2.1, 15.5, 4.1]
 
-# ── Date task ─────────────────────────────────────────────────────────────────
-
-# Imported from date_bins.py
-# N_BINS=9, BIN_LABELS, BIN_MIDPOINTS
-
 # ── Models ────────────────────────────────────────────────────────────────────
 
 # Each entry: display name → dict with type and path
@@ -73,19 +68,19 @@ MODELS = {
         "path":    str(BIRCH_ROOT / "outputs/finetune_tokens/ModernBERT/best_by_val"),
         "pooling": "cls",
     },
-    # "RoFormer": {
-    #     "type":    "roformer",
-    #     "path":    str(BIRCH_ROOT / "from_scratch/roformer/outputs/checkpoints/checkpoint-16020"),
-    #     "tokenizer": str(BIRCH_ROOT / "from_scratch/roformer/tokenizer"),
-    #     "pooling": "mean",
-    # },
-    # "DualEmb": {
-    #     "type":    "dualemb",
-    #     "path":    str(BIRCH_ROOT / "from_scratch/novgorodets/outputs/final_model"),
-    #     "char_vocab": str(BIRCH_ROOT / "from_scratch/novgorodets/char_tokenizer/char_vocab.json"),
-    #     "word_vocab": str(BIRCH_ROOT / "from_scratch/novgorodets/word_vocab.json"),
-    #     "pooling": "mean",
-    # },
+    "RoFormer": {
+        "type": "roformer",
+        "path": str(BIRCH_ROOT / "outputs/from_scratch/RoFormerBPE/final_model"),
+        "tokenizer": str(BIRCH_ROOT / "from_scratch/RoFormerBPE/tokenizer"),
+        "pooling": "mean",
+    },
+    "DualEmb": {
+        "type": "dualemb",
+        "path": str(BIRCH_ROOT / "outputs/from_scratch/DualEmbLM/final_model"),
+        "char_vocab": str(BIRCH_ROOT / "from_scratch/DualEmbLM/char_tokenizer/char_vocab.json"),
+        "word_vocab": str(BIRCH_ROOT / "from_scratch/DualEmbLM/word_vocab.json"),
+        "pooling": "mean",
+    },
 }
 
 # ── Probing classifier ────────────────────────────────────────────────────────

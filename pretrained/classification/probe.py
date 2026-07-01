@@ -10,7 +10,7 @@ Two tasks:
               metrics: accuracy, macro-F1, per-class F1, confusion matrix
 
   date      — distribution prediction over 9 bins (50-year)
-              loss: KL divergence (as in Aeneas)
+              loss: KL divergence (as in Aeneas, Assael et al. 2025)
               metrics: mean/median distance to ground-truth interval (years)
 
 Outputs (RESULT_DIR = outputs/classification/results).
