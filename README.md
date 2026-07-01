@@ -272,11 +272,11 @@ python evaluate_model.py         # re-evaluate a trained model (optional)
 |---|---|---------------------------------------------------------------------------------------------|
 | `outputs/finetune_char/` | `finetune_char.py` | checkpoints, `report_test_a/b.csv`, `epoch_log.csv`                                         |
 | `outputs/finetune_tokens/` | `finetune_tokens.py` | checkpoints, `report_test_b_tokens.csv`, `epoch_log.csv`                                    |
-| `outputs/zeroshot/` | `zeroshot.py` | per-model zero-shot reports + `zeroshot_summary.csv`                                        |
+| `outputs/zeroshot/` | `zeroshot.py` | per-model zero-shot reports, `zeroshot_summary.csv`                                         |
 | `outputs/baseline/` | baselines | `restoration_baseline_summary.csv`, `classification_baseline_summary.csv`, report CSVs      |
 | `outputs/classification/` | probe pipeline | `data/`, `embeddings/`, `results/` (preds, confusion matrices, t-SNE, `probe_results.json`) |
-| `outputs/from_scratch/DualEmbLM/` | `from_scratch/DualEmbLM/train.py` | `dataset/`, checkpoints, `final_model/`, eval reports                                         |
-| `outputs/from_scratch/RoFormerBPE/` | `from_scratch/RoFormerBPE/train.py` | `dataset/`, checkpoints, `final_model/`, eval reports                                       |
+| `outputs/from_scratch/DualEmbLM/` | `DualEmbLM/train.py` | checkpoints, `final_model/`, eval reports                                                   |
+| `outputs/from_scratch/RoFormerBPE/` | `RoFormerBPE/train.py` | checkpoints, `final_model/`, eval reports                                                   |
 
 ## Acknowledgements
 
