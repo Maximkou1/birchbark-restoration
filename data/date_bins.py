@@ -10,7 +10,8 @@ Aeneas-style date binning for birchbark letters.
   bin 8: 1450–1499  (edge bin, few records)
 
 Ground truth: uniform distribution over bins overlapping [date_min, date_max].
-Loss:         KL divergence (as in Aeneas).
+Loss:         KL divergence (computed in probe.py via torch.nn.functional.kl_div,
+              following Aeneas, Assael et al. 2025).
 Prediction:   weighted mean of predicted distribution.
 Metric:       distance from predicted mean to [date_min, date_max].
 """
@@ -111,49 +112,28 @@ def date_distance(pred_dist: np.ndarray, date_str: str) -> float | None:
         return gt_min - pred_avg
 
 
-# ── KL divergence loss (for reference) ───────────────────────────────────────
-
-def kl_divergence(pred_dist: np.ndarray, target_dist: np.ndarray,
-                  eps: float = 1e-8) -> float:
-    """KL(target || pred) — same direction as Aeneas."""
-    pred_dist   = np.clip(pred_dist,   eps, None)
-    target_dist = np.clip(target_dist, eps, None)
-    return float(np.sum(target_dist * np.log(target_dist / pred_dist)))
-
-
-# ── Convenience: bin index from year ─────────────────────────────────────────
-
-def year_to_bin(year: int) -> int | None:
-    """Returns bin index for a given year, or None if out of range."""
-    idx = (year - BIN_START) // BIN_SIZE
-    if 0 <= idx < N_BINS:
-        return idx
-    return None
-
-
-if __name__ == "__main__":
-    # Quick sanity check
-    test_cases = [
-        "1140‒1160",
-        "1140‒1160 (с вероятным смещением назад)",
-        "1025‒1050",
-        "1380‒1400",
-        "1430‒1450",
-        "1450‒1500",
-    ]
-
-    print(f"Bins ({N_BINS} total, {BIN_SIZE}-year):")
-    for i, (lo, hi) in enumerate(BINS):
-        print(f"  [{i}] {lo}–{hi}  midpoint={BIN_MIDPOINTS[i]:.0f}")
-
-    print()
-    for ds in test_cases:
-        interval = parse_date_interval(ds)
-        target   = make_date_target(ds)
-        if target is None:
-            print(f"  {ds!r:40s}  → SKIP")
-            continue
-        pred_y   = predicted_year(target)   # perfect prediction = target itself
-        dist_str = " ".join(f"{v:.2f}" for v in target)
-        print(f"  {ds!r:45s}  interval={interval}  "
-              f"mean={pred_y:.1f}  dist=[{dist_str}]")
+# if __name__ == "__main__":
+#     test_cases = [
+#         "1140‒1160",
+#         "1140‒1160 (с вероятным смещением назад)",
+#         "1025‒1050",
+#         "1380‒1400",
+#         "1430‒1450",
+#         "1450‒1500",
+#     ]
+#
+#     print(f"Bins ({N_BINS} total, {BIN_SIZE}-year):")
+#     for i, (lo, hi) in enumerate(BINS):
+#         print(f"  [{i}] {lo}–{hi}  midpoint={BIN_MIDPOINTS[i]:.0f}")
+#
+#     print()
+#     for ds in test_cases:
+#         interval = parse_date_interval(ds)
+#         target   = make_date_target(ds)
+#         if target is None:
+#             print(f"  {ds!r:40s}  → SKIP")
+#             continue
+#         pred_y   = predicted_year(target)
+#         dist_str = " ".join(f"{v:.2f}" for v in target)
+#         print(f"  {ds!r:45s}  interval={interval}  "
+#               f"mean={pred_y:.1f}  dist=[{dist_str}]")
