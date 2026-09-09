@@ -24,7 +24,7 @@ corpus:
 - [**DualEmbLM**](https://huggingface.co/MaximEremeev/DualEmb-slav) — a character-level encoder that enriches each character with
   the lexical context of its word through a dual-embedding mechanism
   (concatenation of character and word vectors). On real lacunae (Test B), it
-  reaches character Hit@1 ≈ 47%, outperforming the fine-tuned encoders in the
+  reaches character Hit@1 ≈ 38%, outperforming the fine-tuned encoders in the
   comparable character-level setting.
 
 Character- and token-level restoration on real lacunae (Test B), Hit@1 (%):
