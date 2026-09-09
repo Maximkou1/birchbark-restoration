@@ -4,7 +4,8 @@ evaluate_model.py
 ~~~~~~~~~~~~~~~~
 Unified evaluation for DualBertForMaskedLM (char + word tokenization).
 
-Since dual uses character-level tokenization (1 char = 1 token).
+Since dual uses character-level tokenization (1 char = 1 token), metrics are
+naturally character-level — no BPE boundary issues.
 
 eval / test_a : PPL + char Hit@K + char CER  (collator masking)
 test_b        : PPL + char Hit@K + char CER  (bracket masking, forward pass)
@@ -24,10 +25,10 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 from align_dual import load_vocab, align_char_to_word, SPECIAL_RE
-from beam_search import beam_search_dual, DualBeam
+from aeneas_decode import aeneas_beam_search_dual, DualBeam
 
-_HERE = Path(__file__).resolve().parent              # from_scratch/DualEmbLM/
-_ROOT = _HERE.parent.parent                          # repo root
+_HERE = Path(__file__).resolve().parent
+_ROOT = _HERE.parent
 
 SPAN_PATTERN = re.compile(
     r"\(([^)]+)\)|\[(?!(?:GAP|MASK|PAD|UNK|CLS|SEP)\]|CTX_)([^\]]+)\]"
@@ -116,6 +117,20 @@ def _mask_span_dual(target_text, orig_text, char_vocab, word_vocab,
     for tp in mask_indices:
         masked_enc["input_ids"][tp] = mask_id
         masked_enc["word_ids"][tp]  = unk_word
+
+    # Blank the WHOLE word a masked span falls inside, not just the masked
+    # characters -- word_ids here were computed from target_text (the
+    # answer), so an intact neighbour of the same word would otherwise leak
+    # the correct word identity through self-attention. A real blind
+    # restoration could never look up a corrupted spelling in the clean
+    # word vocabulary, so this matches what's actually recoverable then.
+    masked_word_ids = {
+        enc["word_ids"][tp] for tp in mask_indices if enc["word_ids"][tp] != unk_word
+    }
+    if masked_word_ids:
+        for tp, wid in enumerate(enc["word_ids"]):
+            if wid in masked_word_ids:
+                masked_enc["word_ids"][tp] = unk_word
 
     return masked_enc, mask_indices, true_char_ids
 
@@ -277,6 +292,19 @@ def evaluate_test_b_dual(
                     wrd_full[tp]   = unk_word
                     any_masked     = True
 
+            # Blank the WHOLE word a masked span falls inside, not just the masked characters
+            if any_masked:
+                masked_word_ids = {
+                    enc_full["word_ids"][tp]
+                    for tp in range(len(wrd_full))
+                    if wrd_full[tp] == unk_word
+                    and enc_full["word_ids"][tp] != unk_word
+                }
+                if masked_word_ids:
+                    for tp, wid in enumerate(enc_full["word_ids"]):
+                        if wid in masked_word_ids:
+                            wrd_full[tp] = unk_word
+
             if any_masked:
                 inp_t  = torch.tensor([inp_full], dtype=torch.long).to(device)
                 wrd_t  = torch.tensor([wrd_full], dtype=torch.long).to(device)
@@ -327,7 +355,7 @@ def evaluate_test_b_dual(
                     n_char   += 1
 
                 # Span-level metrics (beam search)
-                beams = beam_search_dual(
+                beams = aeneas_beam_search_dual(
                     torch.tensor(masked_enc["input_ids"], dtype=torch.long).to(device),
                     torch.tensor(masked_enc["word_ids"],  dtype=torch.long).to(device),
                     torch.tensor(masked_enc["attention_mask"], dtype=torch.long).to(device),
@@ -411,93 +439,3 @@ def print_metrics(name: str, m: dict):
         print(f"    Hit@5 (span):    {m['span_hit@5']:.4f}")
         print(f"    Hit@20 (span):   {m['span_hit@20']:.4f}")
         print(f"    CER (span):      {m['span_macro_cer']:.4f}")
-
-# ── CLI ───────────────────────────────────────────────────────────────────────
-
-if __name__ == "__main__":
-    import argparse
-    from datasets import load_from_disk
-
-    from collator import DualPhysicalDegradationCollator
-    from build_char_tokenizer import SPECIAL_TOKENS
-    from model import DualBertForMaskedLM
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--model",
-                        default=str(_ROOT / "outputs/from_scratch/DualEmbLM/final_model"))
-    parser.add_argument("--char_vocab",
-                        default=str(_HERE / "char_tokenizer/char_vocab.json"))
-    parser.add_argument("--word_vocab",
-                        default=str(_HERE / "word_vocab.json"))
-    parser.add_argument("--dataset",
-                        default=str(_ROOT / "outputs/from_scratch/DualEmbLM/dataset"))
-    parser.add_argument("--test_b",
-                        default=str(_ROOT / "data/splits/test_b.jsonl"))
-    parser.add_argument("--out_dir",
-                        default=str(_ROOT / "outputs/from_scratch/DualEmbLM"))
-    parser.add_argument("--beam_width", default=20, type=int)
-    parser.add_argument("--batch_size", default=32, type=int)
-    args = parser.parse_args()
-
-    device  = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    out_dir = Path(args.out_dir)
-    out_dir.mkdir(parents=True, exist_ok=True)
-
-    print(f"Device: {device}")
-    print(f"Model:  {args.model}")
-
-    char_vocab = load_vocab(args.char_vocab)
-    word_vocab = load_vocab(args.word_vocab)
-    id_to_char = {v: k for k, v in char_vocab.items()}
-    unk_char_id = char_vocab.get("[UNK]")
-
-    model = DualBertForMaskedLM.from_pretrained(args.model).to(device)
-    model.eval()
-
-    special_ids = [char_vocab[t] for t in SPECIAL_TOKENS if t in char_vocab]
-    collator = DualPhysicalDegradationCollator(
-        mask_token_id=char_vocab["[MASK]"],
-        pad_token_id=char_vocab["[PAD]"],
-        unk_word_id=word_vocab["[UNK_WORD]"],
-        unk_char_id=unk_char_id,
-        vocab_char_size=len(char_vocab),
-        special_token_ids=special_ids,
-        mlm_prob=0.08,
-        max_span=3,
-        edge_prob=0.1,
-        add_random_gaps=False,
-    )
-
-    dataset = load_from_disk(args.dataset)
-    summary = {}
-
-    if "test_a" in dataset:
-        print("\nEvaluating test_a...")
-        m = evaluate_with_collator_dual(
-            model, id_to_char, dataset["test_a"], collator, device,
-            batch_size=args.batch_size, unk_char_id=unk_char_id,
-            output_path=out_dir / "report_test_a.csv",
-        )
-        print_metrics("test_a", m)
-        summary["test_a"] = m
-
-    print("\nEvaluating test_b (beam search)...")
-    records = []
-    with open(args.test_b, encoding="utf-8") as f:
-        for line in f:
-            if line.strip():
-                r = json.loads(line)
-                records.append({"original": r["original"], "target": r["target"]})
-
-    m = evaluate_test_b_dual(
-        model, char_vocab, word_vocab, records, device,
-        beam_width=args.beam_width, unk_char_id=unk_char_id,
-        output_path=out_dir / "report_test_b.csv",
-    )
-    print_metrics("test_b", m)
-    summary["test_b"] = m
-
-    summary_path = out_dir / "eval_summary.json"
-    with open(summary_path, "w", encoding="utf-8") as f:
-        json.dump(summary, f, ensure_ascii=False, indent=2)
-    print(f"\n  Summary → {summary_path}")

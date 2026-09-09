@@ -61,8 +61,7 @@ class DualBertForMaskedLM(BertPreTrainedModel):
 
         char_emb = self.dual_embeddings.char_embeddings.weight
         logits = x @ char_emb.T + self.mlm_bias
-
-        # Safety check: surface NaN/Inf early with a useful message.
+    
         if torch.isnan(logits).any() or torch.isinf(logits).any():
             emb_norm = self.dual_embeddings.char_embeddings.weight.norm()
             x_norm = x.norm()

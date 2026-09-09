@@ -139,7 +139,17 @@ class DualPhysicalDegradationCollator:
             random_chars[random_chars >= unk_char_id] += 1
         input_ids[rnd] = random_chars[rnd]
 
-        word_ids[final_mask] = self.unk_word_id
+        # Blank out the word_id for the WHOLE word a masked span falls
+        # inside, not just the masked characters themselves.
+        word_mask = final_mask.clone()
+        for i in range(bsz):
+            masked_word_ids = set(word_ids[i, final_mask[i]].tolist())
+            masked_word_ids.discard(self.unk_word_id)
+            if masked_word_ids:
+                word_mask[i] |= torch.isin(
+                    word_ids[i], torch.tensor(list(masked_word_ids))
+                )
+        word_ids[word_mask] = self.unk_word_id
 
         return {
             "input_ids": input_ids,
