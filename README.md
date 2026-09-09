@@ -38,7 +38,7 @@ Character- and token-level restoration on real lacunae (Test B), Hit@1 (%):
 | ModernBERT | zero-shot |   7.38    |   12.52   |
 | ModernBERT | fine-tuned |   16.54   | **30.72** |
 | Char *n*-gram (n=5) | — |   15.01   |     —     |
-| DualEmbLM | from scratch | **46.93** |     —     |
+| DualEmbLM | from scratch | **38.04** |     —     |
 | RoFormerBPE | from scratch |     —     |   14.54   |
 
 Classification on frozen embeddings (linear probe) vs. TF-IDF + LogReg baseline:
